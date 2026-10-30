@@ -20,7 +20,12 @@
     </div>
   </header>
 
-  <main class="grid">
+  <nav class="tabs" id="tabs" role="tablist">
+    <button type="button" class="tab active" role="tab" data-tab="dashboard" aria-selected="true">🎛️ Dashboard</button>
+    <button type="button" class="tab" role="tab" data-tab="sound" aria-selected="false">🔊 Sound</button>
+  </nav>
+
+  <main class="grid tab-pane" id="pane-dashboard">
     <section class="panel config-panel">
       <div class="panel-head"><div><h2>Setup</h2><p>Connect your LIVE account and configure the round.</p></div></div>
       <form id="settingsForm" class="form-grid">
@@ -68,7 +73,7 @@
     <section class="panel demo-panel">
       <div class="panel-head"><div><h2>Demo tools</h2><p>Test the overlay without TikTok LIVE.</p></div></div>
       <div class="demo-form"><input id="demoName" placeholder="Viewer name" value="Viewer"></input><input id="demoCoins" type="number" min="1" value="100"></input><button id="demoGift" class="primary">Send demo drop</button></div>
-      <div class="demo-presets"><button data-coins="5">+5</button><button data-coins="10">+10 stars</button><button data-coins="25">+25 fountain</button><button data-coins="35">+35 hearts</button><button data-coins="60">+60 confetti</button><button data-coins="120">+120 burst</button><button data-coins="150">+150 thunder</button><button data-coins="250">+250 fireworks</button><button data-coins="299">+299 nuke</button><button data-coins="500">+500 money gun</button><button data-coins="1000">+1K galaxy</button><button data-coins="2100">+2.1K shark</button><button data-coins="3000">+3K meteor</button><button data-coins="6000">+6K black hole</button></div>
+      <div class="demo-presets"><button data-coins="5">+5</button><button data-coins="10">+10 stars</button><button data-coins="25">+25 fountain</button><button data-coins="35">+35 hearts</button><button data-coins="60">+60 confetti</button><button data-coins="120">+120 burst</button><button data-coins="150">+150 thunder</button><button data-coins="250">+250 fireworks</button><button data-coins="299">+299 nuke</button><button data-coins="500">+500 money gun</button><button data-coins="777">+777 swan lake</button><button data-coins="1000">+1K galaxy</button><button data-coins="2100">+2.1K shark</button><button data-coins="3000">+3K meteor</button><button data-coins="6000">+6K black hole</button></div>
     </section>
 
     <section class="panel activity-panel">
@@ -91,6 +96,29 @@
           <span class="theme-meta"><b>Theme 3</b><em>Aurora</em><small>Kaca buram membulat, tepi aurora mengalir, avatar bercincin berputar</small></span>
         </button>
       </div>
+    </section>
+  </main>
+
+  <main class="grid tab-pane sound-pane hidden" id="pane-sound">
+    <section class="panel sound-panel">
+      <div class="panel-head"><div><h2>🔊 Big Drop Sound</h2><p>Lagu <b>we-on-go</b> diputar di overlay untuk gift <b>500–999 coins</b>, kapan pun (tidak harus saat auction).</p></div></div>
+      <div class="vol-box">
+        <div class="vol-top"><span>Volume · 500+</span><strong id="bigDropVolLabel">39%</strong></div>
+        <input id="bigDropVol" type="range" min="0" max="100" step="1" value="39">
+        <div class="vol-scale"><span>0%</span><span>50%</span><span>100%</span></div>
+      </div>
+      <div class="actions-row" style="margin-top:14px"><button type="button" class="primary" id="bigDropTest">▶ Test 500+</button><button type="button" class="secondary" id="bigDropReset">Reset 39%</button></div>
+    </section>
+
+    <section class="panel sound-panel">
+      <div class="panel-head"><div><h2>🔥 Huge Drop Sound</h2><p>Lagu <b>Here (Kryd Hoodtrap Remix)</b> untuk gift <b>1000 coins ke atas</b>. Klip 8,5 detik (menit 0:18,5–0:27) dengan fade in &amp; fade out 1 detik, lalu berhenti. Menggantikan we-on-go untuk gift 1000+.</p></div></div>
+      <div class="vol-box">
+        <div class="vol-top"><span>Volume · 1000+</span><strong id="hugeDropVolLabel">37%</strong></div>
+        <input id="hugeDropVol" type="range" min="0" max="100" step="1" value="37">
+        <div class="vol-scale"><span>0%</span><span>50%</span><span>100%</span></div>
+      </div>
+      <div class="actions-row" style="margin-top:14px"><button type="button" class="primary" id="hugeDropTest">▶ Test 1000+</button><button type="button" class="secondary" id="hugeDropReset">Reset 37%</button></div>
+      <small class="field-help" style="display:block;margin-top:12px">Perubahan volume tersimpan otomatis dan langsung berlaku di overlay yang sedang tampil. Tombol test memutar lagu di overlay (OBS / TikTok Live Studio), bukan di halaman ini, jadi overlay harus sedang terbuka. Override manual lewat URL: <code>/overlay?musicvol=0.5</code>.</small>
     </section>
   </main>
 </div>

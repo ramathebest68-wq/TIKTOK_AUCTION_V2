@@ -85,6 +85,14 @@ const sfx={
     for(let i=0;i<10;i++) tone(300+i*70,.3+i*.3,.8,{type:'sine',vol:.025,to:1500+i*150});
     tone(60,3.42,1.2,{type:'sine',vol:.55,to:20}); noise(3.4,1.0,.5); [523,784,1047,1568,2093,3136].forEach((f,i)=>tone(f,3.5+i*.08,.8,{type:'triangle',vol:.11}));
     for(let i=0;i<26;i++) tone(2200+Math.random()*2600,3.9+Math.random()*1.3,.07,{type:'sine',vol:.04}); },
+  swan(){ // danau tenang -> harpa lembut -> kepakan sayap -> ledakan berkilau
+    noise(0,.9,.12); tone(180,0,.9,{type:'sine',vol:.07,to:420});
+    [659,784,988,1319,988,784,659,988,1319,1568].forEach((f,i)=>bell(f,.75+i*.22,.8,.07));
+    [523,659,784].forEach((f,i)=>tone(f,2.9+i*.04,.9,{type:'triangle',vol:.035}));
+    noise(3.6,.3,.28); noise(3.95,.3,.34); noise(4.3,.3,.4); tone(400,3.5,1.05,{type:'triangle',vol:.07,to:1500});
+    tone(70,4.55,.9,{type:'sine',vol:.5,to:24}); noise(4.55,.7,.45);
+    [1047,1319,1568,2093,2637,3136].forEach((f,i)=>bell(f,4.57+i*.06,1.3,.09));
+    for(let i=0;i<18;i++) tone(2400+Math.random()*2600,4.8+Math.random()*1.6,.08,{type:'sine',vol:.035}); },
   shark(){ noise(0,1.0,.22); tone(90,0,1.2,{type:'sine',vol:.2,to:240});
     for(let i=0;i<14;i++) tone(500+Math.random()*900,.05+i*.07,.09,{type:'sine',vol:.04,to:1600});
     [1.5,1.95,2.35,2.7,2.98,3.2,3.38].forEach((t,i)=>{ const f=i%2?87.3:82.4; tone(f,t,.32,{type:'sawtooth',vol:.1}); tone(f/2,t,.4,{type:'sine',vol:.25}); });
@@ -362,9 +370,9 @@ function initSheens(){
 /* tier = visual level (CSS), kind = which effect plays
    1-19 coin | 20+ fountain | 50+ confetti | 100+ burst | 200+ fireworks | 299+ NUKE | 500+ MONEY GUN | 1000+ GALAXY */
 const tierOf=n=>n>=299?5:n>=100?4:n>=50?3:n>=10?2:1;
-const kindOf=n=>n>=5000?'blackhole':n>=3000?'meteor':n>=2100?'shark':n>=1000?'galaxy':n>=500?'moneygun':n>=299?'nuke':n>=200?'fireworks':n>=150?'lightning':n>=100?'burst':n>=50?'confetti':n>=35?'hearts':n>=20?'fountain':n>=10?'stars':'coin';
-const KIND_TAG_HEX={coin:'HEX DROP',stars:'PRISM DROP',fountain:'JET DROP',hearts:'PENTA DROP',confetti:'PARTY DROP',burst:'SHOCK DROP',lightning:'ARC DROP',fireworks:'NOVA DROP',nuke:'CORE DROP',moneygun:'RAIL DROP',galaxy:'GRID DROP',meteor:'METEOR DROP',shark:'SHARK DROP'};
-const KIND_TAG={coin:'DROP',stars:'STAR DROP',fountain:'NICE DROP',hearts:'♥ LOVE DROP',confetti:'SUPER DROP',burst:'BIG DROP',lightning:'⚡ THUNDER DROP!',fireworks:'MEGA DROP',nuke:'☢ NUKE DROP!!!',moneygun:'💸 MONEY GUN DROP!!',galaxy:'✦ GALAXY DROP!!!',meteor:'☄ METEOR DROP!!!!',shark:'🦈 SHARK DROP!!!!',blackhole:'🕳 BLACK HOLE DROP!!!!!'};
+const kindOf=n=>n>=5000?'blackhole':n>=3000?'meteor':n>=2100?'shark':n>=1000?'galaxy':n>=600?'swan':n>=500?'moneygun':n>=299?'nuke':n>=200?'fireworks':n>=150?'lightning':n>=100?'burst':n>=50?'confetti':n>=35?'hearts':n>=20?'fountain':n>=10?'stars':'coin';
+const KIND_TAG_HEX={coin:'HEX DROP',stars:'PRISM DROP',fountain:'JET DROP',hearts:'PENTA DROP',confetti:'PARTY DROP',burst:'SHOCK DROP',lightning:'ARC DROP',fireworks:'NOVA DROP',nuke:'CORE DROP',moneygun:'RAIL DROP',swan:'SWAN DROP',galaxy:'GRID DROP',meteor:'METEOR DROP',shark:'SHARK DROP'};
+const KIND_TAG={coin:'DROP',stars:'STAR DROP',fountain:'NICE DROP',hearts:'♥ LOVE DROP',confetti:'SUPER DROP',burst:'BIG DROP',lightning:'⚡ THUNDER DROP!',fireworks:'MEGA DROP',nuke:'☢ NUKE DROP!!!',moneygun:'💸 MONEY GUN DROP!!',swan:'🦢 SWAN LAKE DROP!!',galaxy:'✦ GALAXY DROP!!!',meteor:'☄ METEOR DROP!!!!',shark:'🦈 SHARK DROP!!!!',blackhole:'🕳 BLACK HOLE DROP!!!!!'};
 function burstFx(x,y,tier){
   const fx=$('fx'); if(!fx) return;
   tier=Math.max(1,Math.min(4,tier));
@@ -470,26 +478,43 @@ function showGiftAlert(g,tier){
   el.className='gift-alert t'+Math.min(5,t)+' k-'+kind;
   void el.offsetWidth; el.classList.add('show');
 }
-/* ---------- Big-drop music: gift >= BIG_DROP_MUSIC_COINS plays /audio/we-on-go.mp3 ---------- */
+/* ---------- Big-drop music ----------
+   gift 500..999  -> /audio/we-on-go.mp3   (volume: config.bigDropVolume)
+   gift >= 1000   -> /audio/here-1000.mp3  (volume: config.hugeDropVolume, 8.5s clip dengan fade in/out)
+   Hanya satu yang bunyi di satu waktu: yang baru menghentikan yang lama. */
 const BIG_DROP_MUSIC_COINS=500;              // ubah angka ini kalau mau threshold lain
+const HUGE_DROP_MUSIC_COINS=1000;
 const BIG_DROP_MUSIC_SRC='/audio/we-on-go.mp3';
-const bigDropVol=Math.min(1,Math.max(0,Number(qs.get('musicvol')??0.75)||0)); // ?musicvol=0.5 untuk kecilkan
-let bigDropAudio=null;
-function bigDropMusic(){
+const HUGE_DROP_MUSIC_SRC='/audio/here-1000.mp3';
+// Volume diatur dari dashboard (tab Sound), default 39% (500+) / 37% (1000+). ?musicvol=0.5 di URL overlay = override manual untuk keduanya.
+function dropVolume(key){
+  const def=key==='hugeDropVolume'?37:39;
+  const q=qs.get('musicvol');
+  const v=(q!==null&&q!=='') ? Number(q) : (Number(state?.config?.[key] ?? def)/100);
+  return Math.min(1,Math.max(0,Number.isFinite(v)?v:def/100));
+}
+const dropAudio={ big:null, huge:null };
+function getDropAudio(kind){
+  if(!dropAudio[kind]){ dropAudio[kind]=new Audio(kind==='huge'?HUGE_DROP_MUSIC_SRC:BIG_DROP_MUSIC_SRC); dropAudio[kind].preload='auto'; }
+  return dropAudio[kind];
+}
+function bigDropMusic(coins){
   if(!soundOn() || qs.get('music')==='0') return;
   try{
-    if(!bigDropAudio){ bigDropAudio=new Audio(BIG_DROP_MUSIC_SRC); bigDropAudio.preload='auto'; }
-    bigDropAudio.volume=bigDropVol;
-    bigDropAudio.currentTime=0;               // gift 500+ berikutnya = lagu mulai dari awal
-    const pr=bigDropAudio.play(); if(pr&&pr.catch) pr.catch(()=>{});
+    const kind=(Number(coins)||0)>=HUGE_DROP_MUSIC_COINS?'huge':'big';
+    const other=dropAudio[kind==='huge'?'big':'huge'];
+    if(other){ other.pause(); other.currentTime=0; }
+    const a=getDropAudio(kind);
+    a.volume=dropVolume(kind==='huge'?'hugeDropVolume':'bigDropVolume');
+    a.currentTime=0;                          // gift berikutnya = lagu mulai dari awal
+    const pr=a.play(); if(pr&&pr.catch) pr.catch(()=>{});
   }catch{}
 }
-if(!inIframe && qs.get('mute')!=='1' && qs.get('music')!=='0'){ try{ bigDropAudio=new Audio(BIG_DROP_MUSIC_SRC); bigDropAudio.preload='auto'; }catch{} } // preload
+if(!inIframe && qs.get('mute')!=='1' && qs.get('music')!=='0'){ try{ getDropAudio('big'); getDropAudio('huge'); }catch{} } // preload
 
 function onGift(g){
   const tier=tierOf(g.coins);
-  if(g.coins>=BIG_DROP_MUSIC_COINS) bigDropMusic();
-  play(kindOf(g.coins)==='moneygun'?'moneygun':kindOf(g.coins)==='blackhole'?'blackhole':({shark:'shark',meteor:'meteor',galaxy:'galaxy',moneygun:'moneygun',nuke:'nuke',fireworks:'fireworks',lightning:'lightning',burst:'big',confetti:'confetti',hearts:'hearts',fountain:'coin2',stars:'stars',coin:'coin'}[kindOf(g.coins)]), g.coins);
+  play(kindOf(g.coins)==='moneygun'?'moneygun':kindOf(g.coins)==='blackhole'?'blackhole':({swan:'swan',shark:'shark',meteor:'meteor',galaxy:'galaxy',moneygun:'moneygun',nuke:'nuke',fireworks:'fireworks',lightning:'lightning',burst:'big',confetti:'confetti',hearts:'hearts',fountain:'coin2',stars:'stars',coin:'coin'}[kindOf(g.coins)]), g.coins);
   showGiftAlert(g,tier);
   const st=$('stack');
   if(tier>=3){
@@ -724,6 +749,8 @@ function updateTimer(){
   handleCountdown(inTimed&&target?e:raw);
 }
 socket.on('auction:state',render);
+// Gift >= 500 coins: server sends this at any time (not only during an active auction phase)
+socket.on('bigdrop:sound',(e)=>bigDropMusic(e?.coins));
 socket.on('auction:tick',t=>{if(state){state.phase=t.phase;state.phaseEndsAt=t.phaseEndsAt;updateTimer();}});
 socket.on('chat:message',chat=>{
   if(state){

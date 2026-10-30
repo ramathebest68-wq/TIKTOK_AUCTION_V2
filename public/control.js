@@ -39,6 +39,10 @@ function fillSettings(c) {
   $('spinHoldSeconds').value = c.spinHoldSeconds || 8;
   fillPrizeFields(c.spinPrizes);
   const snd = $('soundEnabled'); if (snd) snd.checked = c.soundEnabled !== false;
+  const bv = $('bigDropVol');
+  if (bv && document.activeElement !== bv) { bv.value = c.bigDropVolume ?? 39; $('bigDropVolLabel').textContent = bv.value + '%'; }
+  const hv = $('hugeDropVol');
+  if (hv && document.activeElement !== hv) { hv.value = c.hugeDropVolume ?? 37; $('hugeDropVolLabel').textContent = hv.value + '%'; }
   autoSaveEnabled = Boolean(c.autoSave);
   const toggle = $('autoSave');
   if (toggle) toggle.checked = autoSaveEnabled;
@@ -240,3 +244,26 @@ document.querySelectorAll('#prizeModeSeg .seg-opt').forEach((b) => b.addEventLis
   syncPrizeSeg();
   $('prizeMode').dispatchEvent(new Event('change', { bubbles: true }));
 }));
+
+
+// ---- Tabs (Dashboard / Sound)
+document.querySelectorAll('#tabs .tab').forEach((b) => b.addEventListener('click', () => {
+  const t = b.dataset.tab;
+  document.querySelectorAll('#tabs .tab').forEach((x) => { const on = x === b; x.classList.toggle('active', on); x.setAttribute('aria-selected', on); });
+  document.querySelectorAll('.tab-pane').forEach((p) => p.classList.toggle('hidden', p.id !== 'pane-' + t));
+}));
+
+// ---- Drop sound volumes (tab Sound)
+let volTimer = null;
+async function saveDropVol() {
+  clearTimeout(volTimer);
+  await fetch('/api/sound/volume', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ bigDropVolume: $('bigDropVol').value, hugeDropVolume: $('hugeDropVol').value }) });
+}
+function wireVol(sliderId, labelId, testId, resetId, coins, def) {
+  const sl = $(sliderId), lb = $(labelId);
+  sl.addEventListener('input', () => { lb.textContent = sl.value + '%'; clearTimeout(volTimer); volTimer = setTimeout(saveDropVol, 250); });
+  $(testId).addEventListener('click', async () => { await saveDropVol(); fetch('/api/sound/test', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ coins }) }); });
+  $(resetId).addEventListener('click', async () => { sl.value = def; lb.textContent = def + '%'; await saveDropVol(); });
+}
+wireVol('bigDropVol', 'bigDropVolLabel', 'bigDropTest', 'bigDropReset', 500, 39);
+wireVol('hugeDropVol', 'hugeDropVolLabel', 'hugeDropTest', 'hugeDropReset', 1000, 37);
