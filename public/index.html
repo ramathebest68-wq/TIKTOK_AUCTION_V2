@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Auction — TikTok LIVE Control</title>
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body class="dashboard">
+<div class="shell">
+  <header class="topbar">
+    <div>
+      <div class="brand"><span class="brand-star">★</span> AUCTION</div>
+      <div class="muted">TikTok LIVE overlay control</div>
+    </div>
+    <div class="top-actions">
+      <a class="ghost ghost-spin" id="openSpin" href="#" target="_blank" aria-disabled="true">🎰 Open Spin</a>
+      <a class="ghost" id="openOverlay" href="/overlay" target="_blank">Open Overlay</a>
+      <span id="connBadge" class="status-badge">DISCONNECTED</span>
+    </div>
+  </header>
+
+  <main class="grid">
+    <section class="panel config-panel">
+      <div class="panel-head"><div><h2>Setup</h2><p>Connect your LIVE account and configure the round.</p></div></div>
+      <form id="settingsForm" class="form-grid">
+        <label>TikTok username<input id="tiktokUsername" placeholder="yourusername" autocomplete="off"><small class="field-help">Masukkan username LIVE, tanpa link. Akun harus sedang LIVE saat koneksi dilakukan.</small></label>
+        <label>Euler Stream API key (FREE)<input id="eulerApiKey" type="password" placeholder="Paste your free key here" autocomplete="off"><small class="field-help">Free key membuat koneksi tidak memakai anonymous sign limit. <a href="https://www.eulerstream.com/register" target="_blank" rel="noreferrer">Create free key</a>.</small></label>
+        <label>Regular time (sec)<input id="regularSeconds" type="number" min="1"></label>
+        <label>Snipe time (sec)<input id="snipeSeconds" type="number" min="1"></label>
+        <label>Draw time (sec)<input id="drawSeconds" type="number" min="1"></label>
+        <label>Minimum C<input id="minimumCoins" type="number" min="0"></label>
+        <label>Draw margin (C)<input id="drawMarginCoins" type="number" min="0"></label>
+        <label class="full">Prize<input id="prize" placeholder="e.g. 500 Robux"></label>
+        <div class="prize-mode-field"><span class="field-label">Prize mode</span>
+          <select id="prizeMode" class="sr-only" tabindex="-1" aria-hidden="true"><option value="text">Text</option><option value="spin">Spin RBX</option></select>
+          <div class="seg" id="prizeModeSeg" role="radiogroup" aria-label="Prize mode">
+            <button type="button" class="seg-opt" role="radio" data-mode="text" aria-checked="true"><span class="seg-ico">✍️</span><span class="seg-txt"><b>Text</b><small>Hadiah dari kolom Prize</small></span></button>
+            <button type="button" class="seg-opt" role="radio" data-mode="spin" aria-checked="false"><span class="seg-ico">🎰</span><span class="seg-txt"><b>Spin RBX</b><small>Overlay spin terpisah</small></span></button>
+          </div></div>
+        <label>Spin result tampil (detik)<input id="spinHoldSeconds" type="number" min="3" max="120" value="8"></label>
+        <div class="full spin-link-box"><small class="field-help">Link overlay Spin (browser source terpisah, background hijau chroma):</small>
+          <div style="display:flex;gap:8px;margin-top:6px"><input id="spinUrl" readonly style="flex:1"><button type="button" class="secondary" id="copySpinBtn">Copy</button><button type="button" class="secondary" id="testSpinBtn">Test spin</button></div>
+          <div id="spinTestResult" class="muted" style="margin-top:8px">Klik Test spin untuk melihat hasil prize.</div></div>
+        <label class="autosave-toggle"><input id="soundEnabled" type="checkbox" checked><span>Sound</span><small>Overlay sound effects (drop, tick, winner)</small></label>
+        <label class="autosave-toggle"><input id="autoSave" type="checkbox"><span>Auto Save</span><small>Automatically save setup changes</small></label>
+        <div class="full actions-row"><button class="primary" id="saveBtn" type="submit">Save</button><button class="secondary" id="prizesBtn" type="button">🎁 Spin Prizes</button><button class="secondary" id="connectBtn" type="button">Connect</button><button class="danger" id="resetBtn" type="button">Reset Round</button><button class="secondary" id="reloadSnipeBtn" type="button">RELOAD SNIPE</button></div>
+      </form>
+    </section>
+
+    <section class="panel live-panel">
+      <div class="panel-head"><div><h2>Live Auction</h2><p id="phaseText">Idle</p></div><button id="startBtn" class="primary big">Start Auction</button></div>
+      <div class="live-grid">
+        <div class="metric"><span>Phase</span><strong id="phaseValue">IDLE</strong></div>
+        <div class="metric"><span>Countdown</span><strong id="countdown">00:00</strong></div>
+        <div class="metric"><span>Auction</span><strong id="auctionId">#0</strong></div>
+      </div>
+      <div class="preview-wrap"><div class="preview-title">Overlay preview</div><iframe id="overlayFrame" src="/overlay" title="Auction overlay preview"></iframe></div>
+      <div class="preview-wrap spin-preview"><div class="preview-title">Spin preview</div><iframe id="spinFrame" title="Spin overlay preview" style="background:#00ff00"></iframe></div>
+    </section>
+
+    <section class="panel leaderboard-panel">
+      <div class="panel-head"><div><h2>Top 3</h2><p>Qualifying by C total.</p></div></div>
+      <div id="leaderboard" class="dash-list"></div>
+      <div id="winnerBox" class="winner-box hidden"></div>
+    </section>
+
+    <section class="panel demo-panel">
+      <div class="panel-head"><div><h2>Demo tools</h2><p>Test the overlay without TikTok LIVE.</p></div></div>
+      <div class="demo-form"><input id="demoName" placeholder="Viewer name" value="Viewer"></input><input id="demoCoins" type="number" min="1" value="100"></input><button id="demoGift" class="primary">Send demo drop</button></div>
+      <div class="demo-presets"><button data-coins="5">+5</button><button data-coins="10">+10 stars</button><button data-coins="25">+25 fountain</button><button data-coins="35">+35 hearts</button><button data-coins="60">+60 confetti</button><button data-coins="120">+120 burst</button><button data-coins="150">+150 thunder</button><button data-coins="250">+250 fireworks</button><button data-coins="299">+299 nuke</button><button data-coins="500">+500 money gun</button><button data-coins="1000">+1K galaxy</button><button data-coins="2100">+2.1K shark</button><button data-coins="3000">+3K meteor</button><button data-coins="6000">+6K black hole</button></div>
+    </section>
+
+    <section class="panel activity-panel">
+      <div class="panel-head"><div><h2>Activity</h2><p id="connectionText">Waiting for connection…</p></div></div>
+      <div class="activity-columns"><div><h3>Drops</h3><div id="eventLog" class="log"></div></div><div><h3>Chat</h3><div id="chatLog" class="log"></div></div></div>
+    </section>
+    <section class="panel theme-panel">
+      <div class="panel-head"><div><h2>Overlay Theme</h2><p>Pilih tampilan overlay. Langsung tersimpan dan berlaku di overlay yang sedang tampil.</p></div></div>
+      <div class="theme-grid" id="themeGrid">
+        <button type="button" class="theme-card" data-theme="classic" aria-pressed="false">
+          <span class="theme-thumb thumb-classic"><i></i><i></i><i></i></span>
+          <span class="theme-meta"><b>Theme 1</b><em>Classic</em><small>HEX neon: frame hexagon/pentagon, efek &amp; suara baru</small></span>
+        </button>
+        <button type="button" class="theme-card" data-theme="blaxwhit" aria-pressed="false">
+          <span class="theme-thumb thumb-bw"><i></i><i></i><i></i></span>
+          <span class="theme-meta"><b>Theme 2</b><em>BlaxWhit</em><small>Editorial hitam putih, snipe merah</small></span>
+        </button>
+        <button type="button" class="theme-card" data-theme="aurora" aria-pressed="false">
+          <span class="theme-thumb thumb-aurora"><i></i><i></i><i></i></span>
+          <span class="theme-meta"><b>Theme 3</b><em>Aurora</em><small>Kaca buram membulat, tepi aurora mengalir, avatar bercincin berputar</small></span>
+        </button>
+      </div>
+    </section>
+  </main>
+</div>
+<div class="modal hidden" id="prizeModal" role="dialog" aria-modal="true" aria-labelledby="prizeModalTitle">
+  <div class="modal-card">
+    <div class="modal-head"><div><h2 id="prizeModalTitle">🎁 Spin Prizes</h2><p>Isi teks hadiah untuk tiap tier. Teks ini yang tampil di tile spin &amp; hasil pemenang.</p></div><button type="button" class="modal-x" id="prizeModalClose" aria-label="Close">✕</button></div>
+    <div class="prize-fields">
+      <label class="pf" style="--c:#66728f"><span><i></i>Basic</span><input id="pz_basic" maxlength="40" placeholder="10 RBX" autocomplete="off"></label>
+      <label class="pf" style="--c:#4b9bff"><span><i></i>Rare</span><input id="pz_rare" maxlength="40" placeholder="25 RBX" autocomplete="off"></label>
+      <label class="pf" style="--c:#a56bff"><span><i></i>Epic</span><input id="pz_epic" maxlength="40" placeholder="50 RBX" autocomplete="off"></label>
+      <label class="pf" style="--c:#ff4f9a"><span><i></i>Legendary</span><input id="pz_legendary" maxlength="40" placeholder="100 RBX" autocomplete="off"></label>
+      <label class="pf" style="--c:#ffc233"><span><i></i>Mythic</span><input id="pz_mythic" maxlength="40" placeholder="500 RBX" autocomplete="off"></label>
+      <label class="pf pf-secret" style="--c:#ff4fd8"><span><i></i>Secret</span><input id="pz_secret" maxlength="40" placeholder="1000 RBX" autocomplete="off"></label>
+    </div>
+    <small class="field-help">Maks 40 karakter per hadiah. Kosongkan kolom untuk kembali ke default.</small>
+    <div class="modal-actions"><button type="button" class="secondary" id="prizeReset">Reset default</button><span style="flex:1"></span><button type="button" class="secondary" id="prizeCancel">Cancel</button><button type="button" class="primary" id="prizeSave">Save</button></div>
+  </div>
+</div>
+<script src="/socket.io/socket.io.js"></script>
+<script src="/control.js"></script>
+</body>
+</html>
