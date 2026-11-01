@@ -26,6 +26,11 @@ const defaultConfig = {
   soundEnabled: true,
   bigDropVolume: 39,   // % volume of we-on-go.mp3 (0-100)
   hugeDropVolume: 37,  // % volume of here-1000.mp3 (gift >= 1000 coins)
+  masterVolume: 100,   // % master: semua suara (synth, lagu drop, spin)
+  systemVolume: 100,   // % tick / countdown, overtaken, snipe, bonus time, win
+  coinVolume: 100,     // % suara coin nambah (coin, pip)
+  fxVolume: 100,       // % suara animasi gift besar (stars ... black hole)
+  spinVolume: 100,     // % suara spin wheel
   overlayTheme: 'classic',
   prizeMode: 'text',
   spinHoldSeconds: 8,
@@ -175,6 +180,11 @@ function sanitizeConfig(input) {
     soundEnabled: input.soundEnabled === undefined ? (config.soundEnabled !== false) : Boolean(input.soundEnabled),
     bigDropVolume: clampInt(input.bigDropVolume ?? config.bigDropVolume ?? 39, 0, 100),
     hugeDropVolume: clampInt(input.hugeDropVolume ?? config.hugeDropVolume ?? 37, 0, 100),
+    masterVolume: clampInt(input.masterVolume ?? config.masterVolume ?? 100, 0, 100),
+    systemVolume: clampInt(input.systemVolume ?? config.systemVolume ?? 100, 0, 100),
+    coinVolume: clampInt(input.coinVolume ?? config.coinVolume ?? 100, 0, 100),
+    fxVolume: clampInt(input.fxVolume ?? config.fxVolume ?? 100, 0, 100),
+    spinVolume: clampInt(input.spinVolume ?? config.spinVolume ?? 100, 0, 100),
     overlayTheme: normTheme(input.overlayTheme ?? config.overlayTheme),
     prizeMode: normPrizeMode(input.prizeMode ?? config.prizeMode),
     spinHoldSeconds: clampInt(input.spinHoldSeconds ?? config.spinHoldSeconds, 3, 120),
@@ -1143,6 +1153,11 @@ app.post('/api/config', async (req, res) => {
     soundEnabled: input.soundEnabled === undefined ? (current.soundEnabled !== false) : Boolean(input.soundEnabled),
     bigDropVolume: clamp(input.bigDropVolume ?? current.bigDropVolume ?? 39, 0, 100),
     hugeDropVolume: clamp(input.hugeDropVolume ?? current.hugeDropVolume ?? 37, 0, 100),
+    masterVolume: clamp(input.masterVolume ?? current.masterVolume ?? 100, 0, 100),
+    systemVolume: clamp(input.systemVolume ?? current.systemVolume ?? 100, 0, 100),
+    coinVolume: clamp(input.coinVolume ?? current.coinVolume ?? 100, 0, 100),
+    fxVolume: clamp(input.fxVolume ?? current.fxVolume ?? 100, 0, 100),
+    spinVolume: clamp(input.spinVolume ?? current.spinVolume ?? 100, 0, 100),
     overlayTheme: normTheme(input.overlayTheme ?? current.overlayTheme),
     prizeMode: normPrizeMode(input.prizeMode ?? current.prizeMode),
     spinHoldSeconds: clamp(input.spinHoldSeconds ?? current.spinHoldSeconds ?? 8, 3, 120),
@@ -1173,6 +1188,9 @@ app.post('/api/sound/volume', async (req, res) => {
   const vol = (v, d) => { const n = Number.parseInt(v, 10); return Number.isFinite(n) ? Math.min(100, Math.max(0, n)) : d; };
   if (req.body?.bigDropVolume !== undefined) session.config.bigDropVolume = vol(req.body.bigDropVolume, 39);
   if (req.body?.hugeDropVolume !== undefined) session.config.hugeDropVolume = vol(req.body.hugeDropVolume, 37);
+  for (const k of ['masterVolume', 'systemVolume', 'coinVolume', 'fxVolume', 'spinVolume']) {
+    if (req.body?.[k] !== undefined) session.config[k] = vol(req.body[k], 100);
+  }
   await session.saveConfig();
   session.broadcast();
   res.json(session.publicState());

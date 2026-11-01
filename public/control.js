@@ -43,6 +43,10 @@ function fillSettings(c) {
   if (bv && document.activeElement !== bv) { bv.value = c.bigDropVolume ?? 39; $('bigDropVolLabel').textContent = bv.value + '%'; }
   const hv = $('hugeDropVol');
   if (hv && document.activeElement !== hv) { hv.value = c.hugeDropVolume ?? 37; $('hugeDropVolLabel').textContent = hv.value + '%'; }
+  for (const [id, key] of MIX_VOLS) {
+    const el = $(id);
+    if (el && document.activeElement !== el) { el.value = c[key] ?? 100; $(id + 'Label').textContent = el.value + '%'; }
+  }
   autoSaveEnabled = Boolean(c.autoSave);
   const toggle = $('autoSave');
   if (toggle) toggle.checked = autoSaveEnabled;
@@ -255,10 +259,18 @@ document.querySelectorAll('#tabs .tab').forEach((b) => b.addEventListener('click
 
 // ---- Drop sound volumes (tab Sound)
 let volTimer = null;
+const MIX_VOLS = [['masterVol', 'masterVolume'], ['systemVol', 'systemVolume'], ['coinVol', 'coinVolume'], ['fxVol', 'fxVolume'], ['spinVol', 'spinVolume']];
 async function saveDropVol() {
   clearTimeout(volTimer);
-  await fetch('/api/sound/volume', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ bigDropVolume: $('bigDropVol').value, hugeDropVolume: $('hugeDropVol').value }) });
+  const body = { bigDropVolume: $('bigDropVol').value, hugeDropVolume: $('hugeDropVol').value };
+  for (const [id, key] of MIX_VOLS) body[key] = $(id).value;
+  await fetch('/api/sound/volume', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
 }
+for (const [id] of MIX_VOLS) {
+  const sl = $(id), lb = $(id + 'Label');
+  sl.addEventListener('input', () => { lb.textContent = sl.value + '%'; clearTimeout(volTimer); volTimer = setTimeout(saveDropVol, 250); });
+}
+$('allVolReset').addEventListener('click', async () => { for (const [id] of MIX_VOLS) { $(id).value = 100; $(id + 'Label').textContent = '100%'; } await saveDropVol(); });
 function wireVol(sliderId, labelId, testId, resetId, coins, def) {
   const sl = $(sliderId), lb = $(labelId);
   sl.addEventListener('input', () => { lb.textContent = sl.value + '%'; clearTimeout(volTimer); volTimer = setTimeout(saveDropVol, 250); });

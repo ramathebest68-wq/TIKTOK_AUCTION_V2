@@ -34,7 +34,7 @@
 
   // ---- sound
   let AC, snd = true;
-  const tone = (f, d, t = 'triangle', v = .05) => { if (!snd) return; try { AC = AC || new (window.AudioContext || window.webkitAudioContext)(); const o = AC.createOscillator(), g = AC.createGain(); o.type = t; o.frequency.value = f; g.gain.setValueAtTime(v, AC.currentTime); g.gain.exponentialRampToValueAtTime(.0001, AC.currentTime + d); o.connect(g).connect(AC.destination); o.start(); o.stop(AC.currentTime + d); } catch (e) {} };
+  let spinVol = 1; const tone = (f, d, t = 'triangle', v = .05) => { if (!snd || spinVol <= 0) return; v = Math.max(.0002, v * spinVol); try { AC = AC || new (window.AudioContext || window.webkitAudioContext)(); const o = AC.createOscillator(), g = AC.createGain(); o.type = t; o.frequency.value = f; g.gain.setValueAtTime(v, AC.currentTime); g.gain.exponentialRampToValueAtTime(.0001, AC.currentTime + d); o.connect(g).connect(AC.destination); o.start(); o.stop(AC.currentTime + d); } catch (e) {} };
 
   // ---- run control (abort when round is reset)
   let runId = 0, playedSeq = null, running = false;
@@ -219,6 +219,7 @@
 
   socket.on('auction:state', (s) => {
     snd = s.config?.soundEnabled !== false;
+    { const pct = (k) => { const n = Number(s.config?.[k]); return Number.isFinite(n) ? Math.min(100, Math.max(0, n)) / 100 : 1; }; spinVol = pct('masterVolume') * pct('spinVolume'); }
     const hasSpin = s.phase === 'finished' && s.winner && s.spin;
     if (hasSpin) {
       if (playedSeq !== s.spin.seq) {

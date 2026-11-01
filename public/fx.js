@@ -593,7 +593,6 @@ function fxMoneyGun(key,from,to){
         fxRing(T.x,T.y,{color:'255,120,235',max:190,life:.8,width:8,delay:.1});
         for(let i=0;i<FIN;i++){ const ang2=-Math.PI/2+(Math.random()-.5)*2.1, sp=380+Math.random()*520;
           fxHomer({T,tr,bill:i%3!==0,x:T.rx+(Math.random()-.5)*rw*.5,y:T.ry,vx:Math.cos(ang2)*sp,vy:Math.sin(ang2)*sp,grav:1000,drag:.1,home:.5+Math.random()*.3,r:i%3===0?9:11}); }
-        fxCashText(T.rx,T.ry-4,'+'+delta.toLocaleString()+' C',{size:36,life:2.0,rise:46});
         try{ hxShake(); }catch(e){}
       }
       if(t>END) a.done=true;
@@ -646,7 +645,6 @@ function fxBlackhole(key,from,to){
         fxAdd({ life:.7, draw(g,b){ const k=b.t/b.life; if(k>=1){b.done=true;return;} g.save(); g.globalCompositeOperation='lighter'; g.globalAlpha=1-k;
           const lg=g.createLinearGradient(cx,cy,T.x,T.y); lg.addColorStop(0,'rgba(255,255,255,1)'); lg.addColorStop(1,'rgba(255,190,80,.4)');
           g.strokeStyle=lg; g.lineCap='round'; g.lineWidth=26*(1-k)+3; g.shadowColor='rgba(255,170,60,1)'; g.shadowBlur=26; g.beginPath(); g.moveTo(cx,cy); g.lineTo(T.x,T.y); g.stroke(); g.restore(); } });
-        fxCashText(T.rx,T.ry-2,'+'+delta.toLocaleString()+' C',{size:38,life:2.2,rise:50,c1:'#ffffff',c2:'#ffb347',glow:'255,150,50',delay:.5});
       }
       if(t>END) a.done=true;
     },
@@ -1476,7 +1474,6 @@ function fxSwan(key,from,to){
     fxRing(bx,by,{color:'255,240,170',max:360,life:.8,width:16}); fxRing(bx,by,{color:'255,255,255',max:230,life:.6,width:10,delay:.08}); fxRing(bx,by,{color:'150,215,255',max:300,life:.9,width:8,delay:.18});
     ripple(bx,WY+SZ*.08,SZ*1.2,1.8,.7); ripple(bx,WY+SZ*.08,SZ*.8,1.4,.6);
     fxGlitter(bx,by,46,{spread:420,life:1.7,grav:90,col:'255,238,170',size:20});
-    fxCashText(W/2,H*.2,'SWAN LAKE',{size:32,life:2,c1:'#ffffff',c2:'#9fdcff',glow:'110,190,255',rise:26});
     const FN=Math.min(110,70+Math.round(delta/40));
     for(let i=0;i<FN;i++){ const ang=Math.random()*Math.PI*2, sp=140+Math.random()*560, life=2.6+Math.random()*2;
       feathers.push({x:bx+(Math.random()-.5)*30,y:by+(Math.random()-.5)*30,vx:Math.cos(ang)*sp,vy:Math.sin(ang)*sp*.85-90,rot:Math.random()*6.28,vr:(Math.random()-.5)*10,l:7+Math.random()*9,ph:Math.random()*6.28,t:0,life,gold:i%5===0,land:false,floor:WY+SZ*(.02+Math.random()*.14)}); }

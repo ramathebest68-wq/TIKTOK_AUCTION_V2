@@ -101,6 +101,37 @@
 
   <main class="grid tab-pane sound-pane hidden" id="pane-sound">
     <section class="panel sound-panel">
+      <div class="panel-head"><div><h2>🎚️ Volume Semua Suara</h2><p>Atur volume tiap jenis suara di overlay. Master mengalikan semuanya (termasuk lagu drop &amp; spin). Geser ke <b>0%</b> untuk mematikan jenis suara itu.</p></div></div>
+      <div class="vol-box" style="margin-top:12px">
+        <div class="vol-top"><span>🔊 Master (semua suara)</span><strong id="masterVolLabel">100%</strong></div>
+        <input id="masterVol" type="range" min="0" max="100" step="1" value="100">
+        <div class="vol-scale"><span>0% (mati)</span><span></span><span>100%</span></div>
+      </div>
+      <div class="vol-box" style="margin-top:12px">
+        <div class="vol-top"><span>⏱️ System sound</span><strong id="systemVolLabel">100%</strong></div>
+        <input id="systemVol" type="range" min="0" max="100" step="1" value="100">
+        <div class="vol-scale"><span>0% (mati)</span><span>tick, countdown, overtaken, snipe, bonus time, win</span><span>100%</span></div>
+      </div>
+      <div class="vol-box" style="margin-top:12px">
+        <div class="vol-top"><span>🪙 Coin nambah</span><strong id="coinVolLabel">100%</strong></div>
+        <input id="coinVol" type="range" min="0" max="100" step="1" value="100">
+        <div class="vol-scale"><span>0% (mati)</span><span>suara tiap coin masuk</span><span>100%</span></div>
+      </div>
+      <div class="vol-box" style="margin-top:12px">
+        <div class="vol-top"><span>✨ Animasi gift besar</span><strong id="fxVolLabel">100%</strong></div>
+        <input id="fxVol" type="range" min="0" max="100" step="1" value="100">
+        <div class="vol-scale"><span>0% (mati)</span><span>stars, fountain, galaxy, nuke, dll</span><span>100%</span></div>
+      </div>
+      <div class="vol-box" style="margin-top:12px">
+        <div class="vol-top"><span>🎡 Spin wheel</span><strong id="spinVolLabel">100%</strong></div>
+        <input id="spinVol" type="range" min="0" max="100" step="1" value="100">
+        <div class="vol-scale"><span>0% (mati)</span><span>suara roda hadiah</span><span>100%</span></div>
+      </div>
+      <div class="actions-row" style="margin-top:14px"><button type="button" class="secondary" id="allVolReset">Reset semua ke 100%</button></div>
+      <small class="field-help" style="display:block;margin-top:12px">Tersimpan otomatis dan langsung berlaku di overlay yang sedang tampil. Volume lagu Big/Huge Drop di bawah juga ikut dikalikan Master.</small>
+    </section>
+
+    <section class="panel sound-panel">
       <div class="panel-head"><div><h2>🔊 Big Drop Sound</h2><p>Lagu <b>we-on-go</b> diputar di overlay untuk gift <b>500–999 coins</b>, kapan pun (tidak harus saat auction).</p></div></div>
       <div class="vol-box">
         <div class="vol-top"><span>Volume · 500+</span><strong id="bigDropVolLabel">39%</strong></div>
